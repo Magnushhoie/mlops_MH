@@ -106,12 +106,12 @@ def main(input_filepath, output_filepath):
     print(f"\nVisualizing data, saving to {output_filepath}")
 
     visualize.plot_metric(loss_list, "Loss")
-    filepath = output_filepath + "train_loss.pdf"
+    filepath = output_filepath + "/train_loss.pdf"
     print(f"Saving {filepath}")
     plt.savefig(filepath)
 
     visualize.plot_metric(accuracy_list, "Accuracy")
-    filepath = output_filepath + "train_accuracy.pdf"
+    filepath = output_filepath + "/train_accuracy.pdf"
     print(f"Saving {filepath}")
     plt.savefig(filepath)
 

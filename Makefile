@@ -36,7 +36,7 @@ data: requirements
 
 ## Train
 train: requirements
-	$(PYTHON_INTERPRETER) src/models/train.py data/processed data/models
+	$(PYTHON_INTERPRETER) src/models/train.py data/processed models
 
 ## Evaluate
 evaluate: requirements
