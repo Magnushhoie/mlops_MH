@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
 import logging
-import os
 from pathlib import Path
 
 import click

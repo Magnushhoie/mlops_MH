@@ -1,21 +1,17 @@
 # -*- coding: utf-8 -*-
-import glob
 import logging
-import os
 from pathlib import Path
 
 import click
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn.functional as F
 from dotenv import find_dotenv, load_dotenv
 from torch import nn
-from torch.autograd import Variable
 
 from src.models import tools
 from src.models.CNN import CNN
-from src.visualization import visualize
+
+# from src.visualization import visualize
 
 seed = 42
 np.random.seed(seed)
@@ -31,8 +27,8 @@ def predict(model, testloader, criterion):
     model.eval()
     testset = testloader.dataset.tensors[0]
 
-    loss_list = []
-    accuracy_list = []
+    # loss_list = []
+    # accuracy_list = []
 
     # Predict
     correct = 0
@@ -44,7 +40,7 @@ def predict(model, testloader, criterion):
 
         # Loss and accuracy
         running_loss += loss.item()
-        ps = torch.exp(model(images))
+        # ps = torch.exp(model(images))
         predicted = torch.max(output.data, 1)[1]
         correct += (predicted == labels).sum()
 

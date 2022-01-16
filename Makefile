@@ -25,6 +25,11 @@ requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
 	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
 
+## Install Python Dependencies
+requirements_devel: test_environment
+	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
+	$(PYTHON_INTERPRETER) -m pip install -r requirements_devel.txt
+
 ## Make Dataset
 data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw/corruptmnist data/processed
@@ -50,6 +55,7 @@ lint:
 autolint: requirements_devel
 	black src
 	isort src
+	flake8 src
 
 ## Upload Data to S3
 sync_data_to_s3:

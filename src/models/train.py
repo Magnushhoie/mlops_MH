@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-import glob
 import logging
-import os
 from pathlib import Path
 
 import click
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn.functional as F
 from dotenv import find_dotenv, load_dotenv
 from torch import nn
 
@@ -50,7 +47,7 @@ def fit(model, epochs, trainloader, criterion, optimizer):
 
             # Loss and accuracy
             running_loss += loss.item()
-            ps = torch.exp(model(images))
+            # ps = torch.exp(model(images))
             predicted = torch.max(output.data, 1)[1]
             correct += (predicted == labels).sum()
 

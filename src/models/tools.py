@@ -52,6 +52,6 @@ def test_model(model, trainloader, criterion, optimizer, v=True):
         loss = criterion(logits, labels)
         if v:
             print(f"Success! Loss: {loss}")
-    except Error as e:
+    except Exception as e:
         print(f"Error {e}")
         exit()

@@ -1,4 +1,3 @@
-# From: https://github.com/SkafteNicki/dtu_mlops/blob/main/s1_getting_started/exercise_files/helper.py
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
