@@ -1,5 +1,6 @@
 import torch
 
+
 def load_train_valid_test(dataDir, batch_size, shuffle=True, v=True):
     # Load datasets
     trainset = torch.load(dataDir + "/train.pt")
@@ -18,6 +19,7 @@ def load_train_valid_test(dataDir, batch_size, shuffle=True, v=True):
 
     return trainloader, validloader, testloader
 
+
 def save_checkpoint(model, filepath="models/checkpoint.pth", v=False):
     print(f"Saving models.state_dict to {filepath}")
     torch.save(model.state_dict(), filepath)
@@ -26,6 +28,7 @@ def save_checkpoint(model, filepath="models/checkpoint.pth", v=False):
         print(f"Model:\n{model}")
         print(f"The state dict keys:\n{model.state_dict().keys()}")
 
+
 def load_checkpoint(model, filepath="models/checkpoint.pth", v=True):
     print(f"Loading model.state_dict from {filepath}")
     model.load_state_dict(torch.load(filepath))
@@ -33,8 +36,9 @@ def load_checkpoint(model, filepath="models/checkpoint.pth", v=True):
     if v:
         print(f"Model:\n{model}")
         print(f"The state dict keys:\n{model.state_dict().keys()}")
-    
+
     return model
+
 
 def test_model(model, trainloader, criterion, optimizer, v=True):
     dataiter = iter(trainloader)
@@ -46,7 +50,8 @@ def test_model(model, trainloader, criterion, optimizer, v=True):
     # Calculate the loss with the logits and the labels
     try:
         loss = criterion(logits, labels)
-        if v: print(f"Success! Loss: {loss}")
+        if v:
+            print(f"Success! Loss: {loss}")
     except Error as e:
         print(f"Error {e}")
         exit()

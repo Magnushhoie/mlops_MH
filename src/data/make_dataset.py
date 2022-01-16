@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-import click
+import glob
 import logging
+import os
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
 
+import click
 import numpy as np
-import os, glob
-
-from sklearn.model_selection import train_test_split
-
 import torch
+from dotenv import find_dotenv, load_dotenv
+from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset
 
 seed = 42
@@ -22,9 +21,12 @@ verbose = True
 subset = True
 subset_fraction = 0.10
 
-def extract_save_train_valid_test(dataDir, outDir, subset=True, subset_fraction=0.10, seed=seed):
-    """ Saves pre-processed tensor datasets from loaded files in dataDir
-    
+
+def extract_save_train_valid_test(
+    dataDir, outDir, subset=True, subset_fraction=0.10, seed=seed
+):
+    """Saves pre-processed tensor datasets from loaded files in dataDir
+
     Args:
         dataDir: Directory with training and testing numpy array files
         outDir: Directory to save pre-processed train, validation and test dataset tensor files
@@ -36,16 +38,19 @@ def extract_save_train_valid_test(dataDir, outDir, subset=True, subset_fraction=
         Nothing
     """
     train_list = glob.glob(dataDir + "/train*.npz")
-    test_list = glob.glob(dataDir + "/test*.npz") 
+    test_list = glob.glob(dataDir + "/test*.npz")
 
     def load_data(file_list, v=True):
-        """ Loads numpy array data such as training set from list of files """
+        """Loads numpy array data such as training set from list of files"""
         if v:
             print("Loading data from:", file_list, end="\n")
 
         images_list, labels_list = [], []
         for i in range(len(file_list)):
-            images, labels = np.load(file_list[i])["images"], np.load(file_list[i])["labels"]
+            images, labels = (
+                np.load(file_list[i])["images"],
+                np.load(file_list[i])["labels"],
+            )
             images_list.append(images)
             labels_list.append(labels)
 
@@ -59,7 +64,7 @@ def extract_save_train_valid_test(dataDir, outDir, subset=True, subset_fraction=
         Images = Images.astype(np.float32)
         Labels = Labels.astype(np.int64)
 
-        return(Images, Labels)
+        return (Images, Labels)
 
     if subset:
         train_list = train_list[0:1]
@@ -68,9 +73,9 @@ def extract_save_train_valid_test(dataDir, outDir, subset=True, subset_fraction=
     X_train, y_train = load_data(train_list)
 
     # Split by subset_fraction
-    X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train,
-                                         test_size=subset_fraction,
-                                         random_state=seed)
+    X_train, X_valid, y_train, y_valid = train_test_split(
+        X_train, y_train, test_size=subset_fraction, random_state=seed
+    )
 
     # Test dataset
     X_test, y_test = load_data(test_list)
@@ -94,22 +99,31 @@ def extract_save_train_valid_test(dataDir, outDir, subset=True, subset_fraction=
     torch.save(TensorDataset(X_valid, y_valid), outDir + "/valid.pt")
     torch.save(TensorDataset(X_test, y_test), outDir + "/test.pt")
 
+
 @click.command()
-@click.argument('input_filepath', default="data/raw/corruptmnist", type=click.Path(exists=True))
-@click.argument('output_filepath', default="data/processed/", type=click.Path())
+@click.argument(
+    "input_filepath", default="data/raw/corruptmnist", type=click.Path(exists=True)
+)
+@click.argument("output_filepath", default="data/processed/", type=click.Path())
 def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+    """Runs data processing scripts to turn raw data from (../raw) into
+    cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    logger.info("making final data set from raw data")
 
     # Extract and save data
-    extract_save_train_valid_test(dataDir=input_filepath, outDir=output_filepath, subset=True, subset_fraction=0.10, seed=seed)
+    extract_save_train_valid_test(
+        dataDir=input_filepath,
+        outDir=output_filepath,
+        subset=True,
+        subset_fraction=0.10,
+        seed=seed,
+    )
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     # not used in this stub but often useful for finding various files

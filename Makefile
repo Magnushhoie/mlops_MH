@@ -29,8 +29,13 @@ requirements: test_environment
 data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw/corruptmnist data/processed
 
+## Train
 train: requirements
 	$(PYTHON_INTERPRETER) src/models/train.py data/processed data/models
+
+## Evaluate
+evaluate: requirements
+	$(PYTHON_INTERPRETER) src/models/evaluate.py models/checkpoint.pth data/processed data/models
 
 ## Delete all compiled Python files
 clean:
@@ -40,6 +45,11 @@ clean:
 ## Lint using flake8
 lint:
 	flake8 src
+
+## Autolint using black and isort
+autolint: requirements_devel
+	black src
+	isort src
 
 ## Upload Data to S3
 sync_data_to_s3:

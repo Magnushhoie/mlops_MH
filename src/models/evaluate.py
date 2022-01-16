@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
-import click
+import glob
 import logging
+import os
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
 
-import numpy as np
-import os, glob
-
+import click
 import matplotlib.pyplot as plt
-
+import numpy as np
 import torch
-from torch import nn
 import torch.nn.functional as F
+from dotenv import find_dotenv, load_dotenv
+from torch import nn
 from torch.autograd import Variable
 
-from src.models.CNN import CNN
 from src.models import tools
+from src.models.CNN import CNN
 from src.visualization import visualize
 
 seed = 42
@@ -25,6 +24,7 @@ np.random.seed(seed)
 verbose = True
 epochs = 4
 batch_size = 64
+
 
 def predict(model, testloader, criterion):
 
@@ -45,7 +45,7 @@ def predict(model, testloader, criterion):
         # Loss and accuracy
         running_loss += loss.item()
         ps = torch.exp(model(images))
-        predicted = torch.max(output.data, 1)[1] 
+        predicted = torch.max(output.data, 1)[1]
         correct += (predicted == labels).sum()
 
     mean_loss = running_loss / len(testset)
@@ -56,15 +56,19 @@ def predict(model, testloader, criterion):
 
 
 @click.command()
-@click.argument('model_filepath', default="models/checkpoint.pth", type=click.Path(exists=True))
-@click.argument('input_filepath', default="data/processed", type=click.Path(exists=True))
-@click.argument('output_filepath', default="models", type=click.Path())
+@click.argument(
+    "model_filepath", default="models/checkpoint.pth", type=click.Path(exists=True)
+)
+@click.argument(
+    "input_filepath", default="data/processed", type=click.Path(exists=True)
+)
+@click.argument("output_filepath", default="models", type=click.Path())
 def main(model_filepath, input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+    """Runs data processing scripts to turn raw data from (../raw) into
+    cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    logger.info("making final data set from raw data")
 
     # Load model
     model = CNN()
@@ -79,9 +83,10 @@ def main(model_filepath, input_filepath, output_filepath):
     predict(model, testloader, criterion)
 
     print("\nDone!")
-    
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+
+if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     # not used in this stub but often useful for finding various files
