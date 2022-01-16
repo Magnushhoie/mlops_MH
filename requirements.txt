@@ -1,6 +1,15 @@
 # local package
 -e .
 
+# packages
+matplotlib==3
+numpy==1.2
+python-dotenv
+scikit_learn==1.0
+seaborn==0.11
+setuptools
+torch==1.7
+
 # external requirements
 click
 Sphinx
