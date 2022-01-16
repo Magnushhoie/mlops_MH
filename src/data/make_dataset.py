@@ -49,8 +49,15 @@ def extract_save_train_valid_test(dataDir, outDir, subset=True, subset_fraction=
             images_list.append(images)
             labels_list.append(labels)
 
-        # Stack
+        # Stack to N x 28 x 28
         Images, Labels = np.vstack(images_list), np.concatenate(labels_list)
+
+        # Reshape to N x 1 x 28 x 28
+        Images = np.expand_dims(Images, axis=1)
+
+        # Correct dtypes
+        Images = Images.astype(np.float32)
+        Labels = Labels.astype(np.int64)
 
         return(Images, Labels)
 
