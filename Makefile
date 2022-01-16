@@ -40,7 +40,7 @@ train: requirements
 
 ## Evaluate
 evaluate: requirements
-	$(PYTHON_INTERPRETER) src/models/evaluate.py models/checkpoint.pth data/processed data/models
+	$(PYTHON_INTERPRETER) src/models/evaluate.py models/checkpoint.pth data/processed models
 
 ## Delete all compiled Python files
 clean:

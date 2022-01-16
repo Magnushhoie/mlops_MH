@@ -11,8 +11,9 @@ COPY setup.py setup.py
 COPY src/ src/
 COPY data/ data/
 RUN mkdir -p models/
+COPY models/checkpoint.pth models/checkpoint.pth
 
 WORKDIR /
 RUN pip install -r requirements.txt --no-cache-dir
 
-ENTRYPOINT ["python", "-u", "src/models/train.py"]
+ENTRYPOINT ["python", "-u", "src/models/evaluate.py"]
