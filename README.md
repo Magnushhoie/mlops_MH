@@ -1,7 +1,5 @@
-mlops_s2
+mlops exercises
 ==============================
-
-s2
 
 Project Organization
 ------------
