@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 import torch
 from torch import nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
+from src.models.CNN import CNN
 from src.models import tools
 from src.visualization import visualize
 
@@ -25,45 +25,7 @@ verbose = True
 epochs = 4
 batch_size = 64
 
-def load_train_valid_test(dataDir, batch_size, shuffle=True, v=True):
-    # Load datasets
-    trainset = torch.load(dataDir + "train.pt")
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size, shuffle=True)
 
-    validset = torch.load(dataDir + "valid.pt")
-    validloader = torch.utils.data.DataLoader(validset, batch_size, shuffle=True)
-
-    testset = torch.load(dataDir + "test.pt")
-    testloader = torch.utils.data.DataLoader(testset, batch_size, shuffle=True)
-
-    if v:
-        print(f"Train: {trainloader.dataset.tensors[0].shape}")
-        print(f"Valid: {validloader.dataset.tensors[0].shape}")
-        print(f"Test: {testloader.dataset.tensors[0].shape}")
-
-    return trainloader, validloader, testloader
-
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=5)
-        self.conv2 = nn.Conv2d(32, 32, kernel_size=5)
-        self.conv3 = nn.Conv2d(32,64, kernel_size=5)
-        self.fc1 = nn.Linear(3*3*64, 256)
-        self.fc2 = nn.Linear(256, 10)
-
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        #x = F.dropout(x, p=0.5, training=self.training)
-        x = F.relu(F.max_pool2d(self.conv2(x), 2))
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = F.relu(F.max_pool2d(self.conv3(x),2))
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = x.view(-1,3*3*64 )
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
 
 def fit(model, epochs, trainloader, criterion, optimizer):
 
@@ -128,7 +90,7 @@ def main(input_filepath, output_filepath):
 
     # Load data
     print(f"\nLoading data from {input_filepath}")
-    trainloader, validloader, testloader = load_train_valid_test(input_filepath, batch_size, v=verbose)
+    trainloader, validloader, testloader = tools.load_train_valid_test(input_filepath, batch_size, v=verbose)
 
     # Test
     tools.test_model(model, trainloader, criterion, optimizer, v=False)
@@ -156,8 +118,6 @@ def main(input_filepath, output_filepath):
 
     print("\nDone!")
     
-
-
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)

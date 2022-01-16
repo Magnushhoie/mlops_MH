@@ -1,27 +1,38 @@
 import torch
 
+def load_train_valid_test(dataDir, batch_size, shuffle=True, v=True):
+    # Load datasets
+    trainset = torch.load(dataDir + "/train.pt")
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size, shuffle=True)
+
+    validset = torch.load(dataDir + "/valid.pt")
+    validloader = torch.utils.data.DataLoader(validset, batch_size, shuffle=True)
+
+    testset = torch.load(dataDir + "/test.pt")
+    testloader = torch.utils.data.DataLoader(testset, batch_size, shuffle=True)
+
+    if v:
+        print(f"Train: {trainloader.dataset.tensors[0].shape}")
+        print(f"Valid: {validloader.dataset.tensors[0].shape}")
+        print(f"Test: {testloader.dataset.tensors[0].shape}")
+
+    return trainloader, validloader, testloader
+
 def save_checkpoint(model, filepath="models/checkpoint.pth", v=False):
-    print(f"Saving model to {filepath}")
-
-    checkpoint = {"model": model,
-                  "state_dict": model.state_dict()}
-    torch.save(checkpoint, filepath)
+    print(f"Saving models.state_dict to {filepath}")
+    torch.save(model.state_dict(), filepath)
 
     if v:
-        print("Model: \n\n", model, '\n')
-        print("The state dict keys: \n\n", model.state_dict().keys())
+        print(f"Model:\n{model}")
+        print(f"The state dict keys:\n{model.state_dict().keys()}")
 
-def load_checkpoint(filepath, v=True):
-    print("Loading model ...")
-
-    checkpoint = torch.load(filepath)
-
-    model = checkpoint["model"]
-    model.load_state_dict(checkpoint["state_dict"])
+def load_checkpoint(model, filepath="models/checkpoint.pth", v=True):
+    print(f"Loading model.state_dict from {filepath}")
+    model.load_state_dict(torch.load(filepath))
 
     if v:
-        print(f"Model: \n\n {model}\n")
-        print(f"The state dict keys: \n\n{model.state_dict().keys()}")
+        print(f"Model:\n{model}")
+        print(f"The state dict keys:\n{model.state_dict().keys()}")
     
     return model
 
