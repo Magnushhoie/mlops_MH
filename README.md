@@ -1,6 +1,17 @@
 mlops exercises
 ==============================
 
+```bash
+# Create dataset
+python src/data/make_dataset.py
+
+# Train
+# View results in models/*.pdf
+python src/models/train.py
+
+
+```
+
 Project Organization
 ------------
 
