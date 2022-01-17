@@ -2,6 +2,7 @@
 !.dvc
 .hydra/
 outputs/
+exercises/s4_debugging_profiling/datasets/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
