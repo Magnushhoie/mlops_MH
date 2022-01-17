@@ -2,14 +2,19 @@ mlops exercises
 ==============================
 
 ```bash
-# Create dataset
-python src/data/make_dataset.py
+# Download repo and data
+git clone https://github.com/Magnushhoie/mlops_MH.git
+cd mlops_MH
+dvc pull
 
-# Train
-# View results in models/*.pdf
-python src/models/train.py
+# Create new dataset from data/raw/corruptedmnist
+make data
 
+# Train new model from data/processed/train.pt
+make train
 
+# Evaluate trained model on data/processed/test.pt
+make evaluate
 ```
 
 Project Organization
