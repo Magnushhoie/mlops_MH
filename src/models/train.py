@@ -1,29 +1,73 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 from pathlib import Path
 
-import click
+import hydra
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from dotenv import find_dotenv, load_dotenv
+from omegaconf import OmegaConf
 from torch import nn
 
 from src.models import tools
 from src.models.CNN import CNN
 from src.visualization import visualize
 
-seed = 42
-np.random.seed(seed)
+CONF_PATH = Path(os.getcwd(), "config")
 
-# Params
-verbose = True
-epochs = 4
-batch_size = 64
+
+@hydra.main(config_path=CONF_PATH, config_name="main.yaml")
+def train(config):
+    os.chdir(hydra.utils.get_original_cwd())  # Avoid breaking relative path
+    log.info(f"configuration: \n {OmegaConf.to_yaml(config)}")
+    params = config
+    hparams = config.experiment
+
+    verbose = params.verbose
+    np.random.seed(hparams.seed)
+
+    model = CNN()
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=hparams.learning_rate
+    )  # ,lr=0.001, betas=(0.9,0.999))
+
+    # Load data
+    log.info(f"\nLoading data from {params.dataset_path}")
+
+    trainloader, validloader, testloader = tools.load_train_valid_test(
+        params.dataset_path, hparams.batch_size, v=verbose
+    )
+
+    # Test
+    tools.test_model(model, trainloader, criterion, optimizer, v=False)
+
+    # Train
+    log.info("\nTraining model ...")
+    epochs = hparams.epochs
+    loss_list, accuracy_list = fit(model, epochs, trainloader, criterion, optimizer)
+
+    # Save
+    tools.save_checkpoint(model)
+
+    # Visualize
+    log.info(f"\nVisualizing data, saving to {params.output_dir}")
+
+    visualize.plot_metric(loss_list, "Loss")
+    filepath = params.output_dir + "/train_loss.pdf"
+    log.info(f"Saving {filepath}")
+    plt.savefig(filepath)
+
+    visualize.plot_metric(accuracy_list, "Accuracy")
+    filepath = params.output_dir + "/train_accuracy.pdf"
+    log.info(f"Saving {filepath}")
+    plt.savefig(filepath)
+
+    print(loss_list[-1])
 
 
 def fit(model, epochs, trainloader, criterion, optimizer):
-
     model.train()
     trainset = trainloader.dataset.tensors[0]
 
@@ -31,7 +75,7 @@ def fit(model, epochs, trainloader, criterion, optimizer):
     accuracy_list = []
 
     for epoch in range(epochs):
-        print(f"Epoch {epoch+1} / {epochs}")
+        log.info(f"Epoch {epoch+1} / {epochs}")
 
         correct = 0
         running_loss = 0
@@ -53,7 +97,7 @@ def fit(model, epochs, trainloader, criterion, optimizer):
 
         mean_loss = running_loss / len(trainset)
         mean_accuracy = (100 * correct / len(trainset)).item()
-        print(f"Training Loss: {mean_loss:.6f}, Accuracy: {mean_accuracy:.2f}")
+        log.info(f"Training Loss: {mean_loss:.6f}, Accuracy: {mean_accuracy:.2f}")
 
         # Stats
         loss_list.append(mean_loss)
@@ -62,71 +106,9 @@ def fit(model, epochs, trainloader, criterion, optimizer):
     return loss_list, accuracy_list
 
 
-@click.command()
-@click.argument(
-    "input_filepath", default="data/processed/", type=click.Path(exists=True)
-)
-@click.argument("output_filepath", default="models/", type=click.Path())
-def main(input_filepath, output_filepath):
-    """Runs data processing scripts to turn raw data from (../raw) into
-    cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info("making final data set from raw data")
-
-    # Extract and save data
-    model = CNN()
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters())  # ,lr=0.001, betas=(0.9,0.999))
-
-    if verbose:
-        print("Criterion", criterion)
-        print("Optimizer", optimizer)
-        print("Model: \n\n", model, "\n")
-        print("The state dict keys: \n\n", model.state_dict().keys())
-
-    # Load data
-    print(f"\nLoading data from {input_filepath}")
-    trainloader, validloader, testloader = tools.load_train_valid_test(
-        input_filepath, batch_size, v=verbose
-    )
-
-    # Test
-    tools.test_model(model, trainloader, criterion, optimizer, v=False)
-
-    # Train
-    print("\nTraining model ...")
-    epochs = 2
-    loss_list, accuracy_list = fit(model, epochs, trainloader, criterion, optimizer)
-
-    # Save
-    tools.save_checkpoint(model)
-
-    # Visualize
-    print(f"\nVisualizing data, saving to {output_filepath}")
-
-    visualize.plot_metric(loss_list, "Loss")
-    filepath = output_filepath + "/train_loss.pdf"
-    print(f"Saving {filepath}")
-    plt.savefig(filepath)
-
-    visualize.plot_metric(accuracy_list, "Accuracy")
-    filepath = output_filepath + "/train_accuracy.pdf"
-    print(f"Saving {filepath}")
-    plt.savefig(filepath)
-
-    print("\nDone!")
-
-
 if __name__ == "__main__":
-    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    logging.basicConfig(level=logging.INFO, format="[{asctime}] {message}", style="{")
+    log = logging.getLogger(__name__)
+    log.info("fitting on train set")
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
-
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
-
-    main()
+    train()

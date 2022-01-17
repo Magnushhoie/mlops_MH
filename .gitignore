@@ -1,5 +1,7 @@
 # dvc
 !.dvc
+.hydra/
+outputs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

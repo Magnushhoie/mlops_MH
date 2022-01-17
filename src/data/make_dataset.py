@@ -1,28 +1,47 @@
 # -*- coding: utf-8 -*-
 import glob
 import logging
+import os
 from pathlib import Path
 
-import click
+import hydra
 import numpy as np
 import torch
-from dotenv import find_dotenv, load_dotenv
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset
 
 seed = 42
 np.random.seed(seed)
 
-# Params
-dataDir = "../data/raw/corruptmnist/"
-outDir = "../data/processed/"
-verbose = True
-subset = True
-subset_fraction = 0.10
+CONF_PATH = Path(os.getcwd(), "config")
 
 
-def extract_save_train_valid_test(
-    dataDir, outDir, subset=True, subset_fraction=0.10, seed=seed
+@hydra.main(config_path=CONF_PATH, config_name="main.yaml")
+def make_dataset(config):
+    """Runs data processing scripts to turn raw data from (../raw) into
+    cleaned data ready to be analyzed (saved in ../processed).
+    """
+    os.chdir(hydra.utils.get_original_cwd())  # Avoid breaking relative path
+    params = config
+
+    if params.all_train_partitions == "True":
+        all_train_partitions_bool = True
+    else:
+        all_train_partitions_bool = False
+
+    # Extract and save data
+    generate_train_valid_test(
+        dataDir=params.raw_path,
+        outDir=params.dataset_path,
+        subset=all_train_partitions_bool,
+        subset_fraction=params.valid_fraction,
+        seed=seed,
+        verbose=params.verbose,
+    )
+
+
+def generate_train_valid_test(
+    dataDir, outDir, subset=True, subset_fraction=0.10, seed=seed, verbose=True
 ):
     """Saves pre-processed tensor datasets from loaded files in dataDir
 
@@ -42,7 +61,7 @@ def extract_save_train_valid_test(
     def load_data(file_list, v=True):
         """Loads numpy array data such as training set from list of files"""
         if v:
-            print("Loading data from:", file_list, end="\n")
+            log.info(f"Loading data from: {file_list}")
 
         images_list, labels_list = [], []
         for i in range(len(file_list)):
@@ -80,10 +99,10 @@ def extract_save_train_valid_test(
     X_test, y_test = load_data(test_list)
 
     if verbose:
-        print(f"Subsampled {subset_fraction} of training dataset ...")
-        print(f"X_train {X_train.shape}, y_train {y_train.shape}")
-        print(f"X_valid {X_valid.shape}, y_valid {y_valid.shape}")
-        print(f"X_test {X_test.shape}, y_test {y_test.shape}")
+        log.info(f"Subsampled {subset_fraction} of training dataset ...")
+        log.info(f"X_train {X_train.shape}, y_train {y_train.shape}")
+        log.info(f"X_valid {X_valid.shape}, y_valid {y_valid.shape}")
+        log.info(f"X_test {X_test.shape}, y_test {y_test.shape}")
 
     # Convert to tensor
     X_train, y_train = torch.from_numpy(X_train), torch.from_numpy(y_train)
@@ -92,44 +111,16 @@ def extract_save_train_valid_test(
 
     # Save as torch dataset
     if verbose:
-        print(f"Saving train.pt, valid.pt and test.pt to {outDir}")
+        log.info(f"Saving train.pt, valid.pt and test.pt to {outDir}")
 
     torch.save(TensorDataset(X_train, y_train), outDir + "/train.pt")
     torch.save(TensorDataset(X_valid, y_valid), outDir + "/valid.pt")
     torch.save(TensorDataset(X_test, y_test), outDir + "/test.pt")
 
 
-@click.command()
-@click.argument(
-    "input_filepath", default="data/raw/corruptmnist", type=click.Path(exists=True)
-)
-@click.argument("output_filepath", default="data/processed/", type=click.Path())
-def main(input_filepath, output_filepath):
-    """Runs data processing scripts to turn raw data from (../raw) into
-    cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info("making final data set from raw data")
-
-    # Extract and save data
-    extract_save_train_valid_test(
-        dataDir=input_filepath,
-        outDir=output_filepath,
-        subset=True,
-        subset_fraction=0.10,
-        seed=seed,
-    )
-
-
 if __name__ == "__main__":
-    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    logging.basicConfig(level=logging.INFO, format="[{asctime}] {message}", style="{")
+    log = logging.getLogger(__name__)
+    log.info("making dataset")
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
-
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
-
-    main()
+    make_dataset()

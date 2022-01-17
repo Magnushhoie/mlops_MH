@@ -1,0 +1,17 @@
+# Main config file, references default training/model configuration, which can
+# be overriden by an experiment config file.
+
+# Note: The ´@package _global_´ line is essential for this override to happen!
+
+defaults:
+  - _self_  # Also needed so this config is overriden by all the others
+  - experiment: exp1.yaml  # Defines default training hyperparameters
+
+empty: 0
+verbose: "False"
+all_train_partitions: "False"
+valid_fraction: 0.10
+raw_path: "data/raw/corruptmnist"
+dataset_path: "data/processed"
+output_dir: "models"
+model_path: "models/checkpoint.pth"

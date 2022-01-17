@@ -32,15 +32,15 @@ requirements_devel: test_environment
 
 ## Make Dataset
 data: requirements
-	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw/corruptmnist data/processed
+	$(PYTHON_INTERPRETER) src/data/make_dataset.py raw_path=data/raw/corruptmnist dataset_path=data/processed
 
 ## Train
 train: requirements
-	$(PYTHON_INTERPRETER) src/models/train.py data/processed models
+	$(PYTHON_INTERPRETER) src/models/train.py dataset_path=data/processed output_dir=models
 
 ## Evaluate
 evaluate: requirements
-	$(PYTHON_INTERPRETER) src/models/evaluate.py models/checkpoint.pth data/processed models
+	$(PYTHON_INTERPRETER) src/models/evaluate.py model_path=models/checkpoint.pth dataset_path=data/processed output_dir=models
 
 ## Delete all compiled Python files
 clean:
