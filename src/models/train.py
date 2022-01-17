@@ -25,7 +25,7 @@ def train(config):
     hparams = config.experiment
 
     verbose = params.verbose
-    np.random.seed(hparams.seed)
+    np.random.seed(params.seed)
 
     model = CNN()
     criterion = nn.CrossEntropyLoss()

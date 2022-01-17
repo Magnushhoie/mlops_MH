@@ -10,9 +10,6 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset
 
-seed = 42
-np.random.seed(seed)
-
 CONF_PATH = Path(os.getcwd(), "config")
 
 
@@ -24,24 +21,24 @@ def make_dataset(config):
     os.chdir(hydra.utils.get_original_cwd())  # Avoid breaking relative path
     params = config
 
-    if params.all_train_partitions == "True":
-        all_train_partitions_bool = True
-    else:
+    if params.all_train_partitions == "False":
         all_train_partitions_bool = False
+    else:
+        all_train_partitions_bool = True
 
     # Extract and save data
     generate_train_valid_test(
         dataDir=params.raw_path,
         outDir=params.dataset_path,
-        subset=all_train_partitions_bool,
+        all_train_partitions_bool=all_train_partitions_bool,
         subset_fraction=params.valid_fraction,
-        seed=seed,
+        seed=params.seed,
         verbose=params.verbose,
     )
 
 
 def generate_train_valid_test(
-    dataDir, outDir, subset=True, subset_fraction=0.10, seed=seed, verbose=True
+    dataDir, outDir, all_train_partitions_bool=False, subset_fraction=0.10, seed=42, verbose=True
 ):
     """Saves pre-processed tensor datasets from loaded files in dataDir
 
@@ -84,7 +81,7 @@ def generate_train_valid_test(
 
         return (Images, Labels)
 
-    if subset:
+    if not all_train_partitions_bool:
         train_list = train_list[0:1]
 
     # Training and validation dataset

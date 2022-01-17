@@ -26,7 +26,7 @@ def evaluate(config):
     hparams = config.experiment
 
     # verbose = params.verbose
-    np.random.seed(hparams.seed)
+    np.random.seed(params.seed)
 
     # Load model
     model = CNN()

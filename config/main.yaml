@@ -9,6 +9,7 @@ defaults:
 
 empty: 0
 verbose: "False"
+seed: 42
 all_train_partitions: "False"
 valid_fraction: 0.10
 raw_path: "data/raw/corruptmnist"
