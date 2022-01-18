@@ -8,6 +8,7 @@ defaults:
   - experiment: exp1.yaml  # Defines default training hyperparameters
 
 empty: 0
+name: "mlops_MH"
 verbose: "False"
 seed: 42
 all_train_partitions: "False"

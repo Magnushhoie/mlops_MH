@@ -3,6 +3,8 @@
 .hydra/
 outputs/
 exercises/s4_debugging_profiling/datasets/
+models/checkpoint.pth
+temp/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
